@@ -91,9 +91,6 @@ func lsrmd5(config Config) error {
 					Name: d.Name(),
 					MD5:  md5String,
 				})
-				if err != nil {
-					return err
-				}
 			} else {
 				_, err = fmt.Fprintf(resultFile, "%s  %s\n", md5String, strings.ReplaceAll(path, string(os.PathSeparator), "/"))
 				if err != nil {
