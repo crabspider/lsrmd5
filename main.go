@@ -18,6 +18,7 @@ import (
 type Config struct {
 	Directories []string
 	Output      string
+	Flat        bool
 }
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
 	config := Config{
 		Directories: flag.Args(),
 		Output:      output,
+		Flat:        flat,
 	}
 
 	if config.Output == "" {
@@ -47,12 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var err error
-	if !flat {
-		err = lsrmd5(config)
-	} else {
-		err = lsrmd5Flat(config)
-	}
+	err := lsrmd5(config)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -61,65 +58,18 @@ func main() {
 	log.Println(time.Since(startTime))
 }
 
-// 通常モード
-// ディレクトリを辿りながらMD5ハッシュとパスを出力する
 func lsrmd5(config Config) error {
-	resultFile, err := os.Create(config.Output)
-	if err != nil {
-		return err
-	}
-
-	for _, dir := range config.Directories {
-		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if d.IsDir() {
-				return nil
-			}
-
-			md5String, err := calcMD5(path)
-			if err != nil {
-				return err
-			}
-
-			_, err = fmt.Fprintf(resultFile, "%s  %s\n", md5String, strings.ReplaceAll(path, "\\", "/"))
-			if err != nil {
-				return err
-			}
-
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	err = resultFile.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// --flatモード
-// 通常モードと以下の点で異なる
-// ・パスはファイル名のみを出力する
-// ・ファイル名でソートした結果を出力する
-func lsrmd5Flat(config Config) error {
 	type Entry struct {
 		Name string
 		MD5  string
 	}
 
+	var entries []Entry
+
 	resultFile, err := os.Create(config.Output)
 	if err != nil {
 		return err
 	}
-
-	var entries []Entry
 
 	for _, dir := range config.Directories {
 		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
@@ -136,12 +86,19 @@ func lsrmd5Flat(config Config) error {
 				return err
 			}
 
-			entries = append(entries, Entry{
-				Name: d.Name(),
-				MD5:  md5String,
-			})
-			if err != nil {
-				return err
+			if config.Flat {
+				entries = append(entries, Entry{
+					Name: d.Name(),
+					MD5:  md5String,
+				})
+				if err != nil {
+					return err
+				}
+			} else {
+				_, err = fmt.Fprintf(resultFile, "%s  %s\n", md5String, strings.ReplaceAll(path, "\\", "/"))
+				if err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -151,14 +108,16 @@ func lsrmd5Flat(config Config) error {
 		}
 	}
 
-	// ソート
-	sort.SliceStable(entries, func(i, j int) bool { return entries[i].Name < entries[j].Name })
+	if config.Flat {
+		// ソート
+		sort.SliceStable(entries, func(i, j int) bool { return entries[i].Name < entries[j].Name })
 
-	// 出力
-	for _, entry := range entries {
-		_, err = fmt.Fprintf(resultFile, "%s  %s\n", entry.MD5, entry.Name)
-		if err != nil {
-			return err
+		// 出力
+		for _, entry := range entries {
+			_, err = fmt.Fprintf(resultFile, "%s  %s\n", entry.MD5, entry.Name)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
