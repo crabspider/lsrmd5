@@ -95,7 +95,7 @@ func lsrmd5(config Config) error {
 					return err
 				}
 			} else {
-				_, err = fmt.Fprintf(resultFile, "%s  %s\n", md5String, strings.ReplaceAll(path, "\\", "/"))
+				_, err = fmt.Fprintf(resultFile, "%s  %s\n", md5String, strings.ReplaceAll(path, string(os.PathSeparator), "/"))
 				if err != nil {
 					return err
 				}
