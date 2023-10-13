@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -37,11 +36,12 @@ func main() {
 
 	err := lsrmd5(config)
 	if err != nil {
-		log.Fatalln(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
-	log.Println("complete")
-	log.Println(time.Since(startTime))
+	fmt.Println("complete")
+	fmt.Println(time.Since(startTime))
 }
 
 func lsrmd5(config Config) error {
