@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -34,16 +35,6 @@ func main() {
 
 	config.Directories = flag.Args()
 
-	if config.Output == "" {
-		fmt.Println("outputオプションが指定されていません。")
-		os.Exit(1)
-	}
-
-	if len(config.Directories) == 0 {
-		fmt.Println("対象ディレクトリが指定されていません。")
-		os.Exit(1)
-	}
-
 	err := lsrmd5(config)
 	if err != nil {
 		log.Fatalln(err)
@@ -57,6 +48,14 @@ func lsrmd5(config Config) error {
 	type Entry struct {
 		Name string
 		MD5  string
+	}
+
+	if config.Output == "" {
+		return errors.New("outputオプションが指定されていません。")
+	}
+
+	if len(config.Directories) == 0 {
+		return errors.New("対象ディレクトリが指定されていません。")
 	}
 
 	var entries []Entry
