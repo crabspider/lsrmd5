@@ -24,20 +24,15 @@ type Config struct {
 func main() {
 	startTime := time.Now()
 
-	var output string
-	var flat bool
+	var config Config
 
-	flag.StringVar(&output, "output", "", "出力ファイルのパス")
-	flag.StringVar(&output, "o", "", "出力ファイルのパス（短縮）")
-	flag.BoolVar(&flat, "flat", false, "ファイル名のみモード")
+	flag.StringVar(&config.Output, "output", "", "出力ファイルのパス")
+	flag.StringVar(&config.Output, "o", "", "出力ファイルのパス（短縮）")
+	flag.BoolVar(&config.Flat, "flat", false, "ファイル名のみモード")
 
 	flag.Parse()
 
-	config := Config{
-		Directories: flag.Args(),
-		Output:      output,
-		Flat:        flat,
-	}
+	config.Directories = flag.Args()
 
 	if config.Output == "" {
 		fmt.Println("outputオプションが指定されていません。")
