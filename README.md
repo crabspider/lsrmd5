@@ -6,7 +6,7 @@
 
 # 使用例
 
-優先度を下げて実行する事を推奨。Windowsの場合は`start /BELOWNORMAL .\lsrmd5.exe`等。
+優先度を下げて実行する事を推奨。Windowsの場合は`start /belownormal /b /wait .\lsrmd5.exe`等。
 
 ## ファイルリスト作成
 
