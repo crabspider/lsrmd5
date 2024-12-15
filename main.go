@@ -17,7 +17,6 @@ import (
 
 type Config struct {
 	Directories []string
-	Output      string
 	Flat        bool
 }
 
@@ -26,8 +25,6 @@ func main() {
 
 	var config Config
 
-	flag.StringVar(&config.Output, "output", "", "出力ファイルのパス")
-	flag.StringVar(&config.Output, "o", "", "出力ファイルのパス（短縮）")
 	flag.BoolVar(&config.Flat, "flat", false, "ファイル名のみモード")
 
 	flag.Parse()
@@ -36,12 +33,12 @@ func main() {
 
 	err := lsrmd5(config)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	fmt.Println("complete")
-	fmt.Println(time.Since(startTime))
+	fmt.Fprintln(os.Stderr, "complete")
+	fmt.Fprintln(os.Stderr, time.Since(startTime))
 }
 
 func lsrmd5(config Config) error {
@@ -50,20 +47,11 @@ func lsrmd5(config Config) error {
 		MD5  string
 	}
 
-	if config.Output == "" {
-		return errors.New("outputオプションが指定されていません。")
-	}
-
 	if len(config.Directories) == 0 {
 		return errors.New("対象ディレクトリが指定されていません。")
 	}
 
 	var entries []Entry
-
-	resultFile, err := os.Create(config.Output)
-	if err != nil {
-		return err
-	}
 
 	for _, dir := range config.Directories {
 		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
@@ -86,7 +74,7 @@ func lsrmd5(config Config) error {
 					MD5:  md5String,
 				})
 			} else {
-				_, err = fmt.Fprintf(resultFile, "%s  %s\n", md5String, strings.ReplaceAll(path, string(os.PathSeparator), "/"))
+				_, err = fmt.Printf("%s  %s\n", md5String, strings.ReplaceAll(path, string(os.PathSeparator), "/"))
 				if err != nil {
 					return err
 				}
@@ -105,16 +93,11 @@ func lsrmd5(config Config) error {
 
 		// 出力
 		for _, entry := range entries {
-			_, err = fmt.Fprintf(resultFile, "%s  %s\n", entry.MD5, entry.Name)
+			_, err := fmt.Printf("%s  %s\n", entry.MD5, entry.Name)
 			if err != nil {
 				return err
 			}
 		}
-	}
-
-	err = resultFile.Close()
-	if err != nil {
-		return err
 	}
 
 	return nil

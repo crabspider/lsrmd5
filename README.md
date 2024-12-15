@@ -10,11 +10,11 @@
 
 ## ファイルリスト作成
 
-    .\lsrmd5.exe --output="archive.md5"  Documents/archive Dropbox/archive
+    .\lsrmd5.exe Documents/archive Dropbox/archive > archive.md5
 
 ## フォルダ構造無視モード
 
-    .\lsrmd5.exe --output="pictures.md5" --flat Pictures
+    .\lsrmd5.exe --flat Pictures > pictures.md5
 
 通常モードとの違い
 - パスはファイル名のみを出力する
