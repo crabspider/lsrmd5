@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 )
 
 type Config struct {
@@ -21,8 +20,6 @@ type Config struct {
 }
 
 func main() {
-	startTime := time.Now()
-
 	var config Config
 
 	flag.BoolVar(&config.Flat, "flat", false, "ファイル名のみモード")
@@ -36,9 +33,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	fmt.Fprintln(os.Stderr, "complete")
-	fmt.Fprintln(os.Stderr, time.Since(startTime))
 }
 
 func lsrmd5(config Config) error {
