@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 )
 
 type Config struct {
@@ -68,7 +67,7 @@ func lsrmd5(config Config) error {
 					MD5:  md5String,
 				})
 			} else {
-				_, err = fmt.Printf("%s  %s\n", md5String, strings.ReplaceAll(path, string(os.PathSeparator), "/"))
+				_, err = fmt.Printf("%s  %s\n", md5String, filepath.ToSlash(path))
 				if err != nil {
 					return err
 				}
